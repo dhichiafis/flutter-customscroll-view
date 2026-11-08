@@ -6,6 +6,7 @@ import 'package:mysliver/data/appcolor.dart';
 import 'package:mysliver/data/apptextstyle.dart';
 import 'package:mysliver/data/data.dart';
 import 'package:mysliver/pages/filterpage.dart';
+import 'package:mysliver/widgets/categorieswidget.dart';
 import 'package:mysliver/widgets/productcontainer.dart';
 import 'package:mysliver/widgets/reusabledraggablebottomsheet.dart';
 class WhatsappScroll extends StatefulWidget {
@@ -17,9 +18,11 @@ class WhatsappScroll extends StatefulWidget {
 
 class _WhatsappScrollState extends State<WhatsappScroll> {
   String searchText='';
-
+  //tracking the state of our draggable and closing it down
+  bool isBottomSheetVisible=false;
   List<Product>searchedProducts=[];
   List<Product> filteredProducts=[];
+  //these are produts that can be fetched from the server
   final List<Product> products=[
     Product(id: 1, quantity: 12, title: 'tiger', description: "this is  a solu tiger", price: 23444, image: 'https://images.unsplash.com/photo-1615963244664-5b845b2025ee?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D'),
     Product(id: 2, quantity: 12, title: 'Lizard', description: "this is  a solu tiger", price: 23444, image: 'https://images.unsplash.com/photo-1615963244664-5b845b2025ee?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D'),
@@ -30,10 +33,19 @@ class _WhatsappScrollState extends State<WhatsappScroll> {
     Product(id: 7, quantity: 12, title: 'chameleon', description: "this is  a solu tiger", price: 23444, image: 'https://plus.unsplash.com/premium_photo-1722827117771-51f0f24a9a1f?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D'),
     Product(id: 1, quantity: 12, title: 'tiger', description: "this is  a solu tiger", price: 23444, image: 'https://images.unsplash.com/photo-1615963244664-5b845b2025ee?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D'),
   ];
+  //When the bottomSheet is closed we are reseting the searchtext to empty
+  //we are reseting the searched Products as well
+  void closeBottomSheet() {
+  setState(() {
+    isBottomSheetVisible = false;
+    searchText = '';
+    searchedProducts = [];
+  });
+}
   void searchItemsByTitle(String text) {
   setState(() {
     searchText = text;
-
+    isBottomSheetVisible=true;
     if (text.trim().isEmpty) {
       searchedProducts = [];
     } else {
@@ -43,6 +55,14 @@ class _WhatsappScrollState extends State<WhatsappScroll> {
             .contains(text.trim().toLowerCase());
       }).toList();
     }
+  });
+}
+
+void handleCategory(String text){
+  setState(() {
+    filteredProducts=products.where((product){
+      return product.title.toLowerCase().contains(text.toLowerCase());
+    }).toList();
   });
 }
 
@@ -81,7 +101,16 @@ class _WhatsappScrollState extends State<WhatsappScroll> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        IconButton(onPressed: (){}, icon: Icon(Icons.search,size:30,color: LightAppColors.primaryText,)),
+                        isBottomSheetVisible?
+                        IconButton(
+                          onPressed: (){
+                            closeBottomSheet();
+                          }, 
+                          icon: Icon(Icons.arrow_back,size:30,color: LightAppColors.primaryText,))
+                          :IconButton(
+                            onPressed: (){}, 
+                            icon: Icon(Icons.search,size:30)
+                            ),
                         Expanded(
                           child: TextField(
                             textAlign: TextAlign.center,
@@ -109,11 +138,28 @@ class _WhatsappScrollState extends State<WhatsappScroll> {
                 
           
               ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 100,
-                  color: Colors.amber,
-          
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    height: 150,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        CategoriesWidget(categoryTitle: 'All', handleFilter: (){getAllProducts();}),
+                        CategoriesWidget(categoryTitle: 'zebra', handleFilter:(){handleCategory('zebra');}),
+                        CategoriesWidget(categoryTitle: 'cheetah', handleFilter: (){handleCategory('cheetah');}),
+                        CategoriesWidget(categoryTitle: 'hyena', handleFilter: (){handleCategory('hyena');}),
+                        CategoriesWidget(categoryTitle: 'lizard', handleFilter: (){handleCategory('lizard');}),
+                        CategoriesWidget(categoryTitle: 'chameleon', handleFilter: (){handleCategory('chameleon');}),
+                        CategoriesWidget(categoryTitle: 'chameleon', handleFilter: (){handleCategory('chameleon');}),
+                        CategoriesWidget(categoryTitle: 'chameleon', handleFilter: (){handleCategory('chameleon');}),
+                        CategoriesWidget(categoryTitle: 'chameleon', handleFilter: (){handleCategory('chameleon');}),
+                        CategoriesWidget(categoryTitle: 'chameleon', handleFilter: (){handleCategory('chameleon');}),
+                      ],
+                    ),
+                          
+                  ),
                 ),
               ),
               SliverToBoxAdapter(
@@ -151,8 +197,8 @@ class _WhatsappScrollState extends State<WhatsappScroll> {
             ],
             scrollDirection: Axis.vertical,
           ),
-          if(searchText.trim().isNotEmpty)
-            ReusableDraggableBottomSheet(searchedProducts: searchedProducts,)
+          if(isBottomSheetVisible)
+            ReusableDraggableBottomSheet(searchedProducts: searchedProducts,toggleBottomSheet:isBottomSheetVisible)
           
   
           ]

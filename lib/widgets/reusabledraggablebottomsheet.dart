@@ -9,8 +9,10 @@ class ReusableDraggableBottomSheet extends StatefulWidget {
   const ReusableDraggableBottomSheet({
     super.key,
     required this.searchedProducts,
-  });
+    required this.toggleBottomSheet
 
+  });
+  final bool toggleBottomSheet;
   final List<Product> searchedProducts;
 
   @override
